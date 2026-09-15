@@ -191,6 +191,21 @@ export const AdminSettings = () => {
             ></textarea>
           </div>
 
+          <div className="form-field">
+            <label className="form-label">Showroom Video URL (YouTube / Vimeo / MP4)</label>
+            <input
+              type="url"
+              name="videoUrl"
+              placeholder="e.g. https://www.youtube.com/watch?v=... or https://youtu.be/..."
+              className="form-input"
+              value={formData.videoUrl || ''}
+              onChange={handleChange}
+            />
+            <span style={{ fontSize: '1.2rem', color: 'var(--granite-gray)' }}>
+              Optional. Leave empty if no video is currently configured.
+            </span>
+          </div>
+
           <hr style={{ border: 'none', borderTop: '1px solid var(--black_10)', margin: '25px 0' }} />
 
           <h3 style={{ fontSize: '1.8rem', fontWeight: '700', marginBottom: '18px', color: 'var(--smokey-black)' }}>

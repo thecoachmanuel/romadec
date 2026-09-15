@@ -376,6 +376,7 @@ export const initialBusinessInfo = {
   currencySymbol: '₦',
   aboutText:
     'Modern & Luxury Turkish Furniture. Timeless designs to suit any style of interior design. Worldwide Delivery. Est. in 1994.',
+  videoUrl: '',
   socialLinks: {
     facebook: 'https://facebook.com/romadec',
     twitter: 'https://twitter.com/romadec',

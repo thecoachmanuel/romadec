@@ -21,6 +21,10 @@ const businessInfoSchema = new mongoose.Schema(
       default:
         'Modern & Luxury Turkish Furniture. Timeless designs to suit any style of interior design. Worldwide Delivery. Est. in 1994.',
     },
+    videoUrl: {
+      type: String,
+      default: '',
+    },
     socialLinks: {
       facebook: { type: String, default: 'https://facebook.com/romadec' },
       twitter: { type: String, default: 'https://twitter.com/romadec' },

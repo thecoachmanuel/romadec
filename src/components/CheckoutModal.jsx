@@ -227,7 +227,7 @@ export const CheckoutModal = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="form-row-2">
                 <div className="form-field">
                   <label className="form-label">Email Address *</label>
                   <input
@@ -268,7 +268,7 @@ export const CheckoutModal = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '15px' }}>
+              <div className="form-row-3">
                 <div className="form-field">
                   <label className="form-label">City / Town *</label>
                   <input

@@ -189,8 +189,8 @@ export const AdminOrders = () => {
       {selectedOrder && (
         <div className="app-overlay active" onClick={() => setSelectedOrder(null)}>
           <div
-            className="app-modal active"
-            style={{ maxWidth: '650px', padding: '30px' }}
+            className="app-modal active admin-modal-body"
+            style={{ maxWidth: '680px', width: '92%' }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -208,7 +208,7 @@ export const AdminOrders = () => {
               Placed on {new Date(selectedOrder.createdAt).toLocaleString('en-NG')}
             </p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+            <div className="form-row-2" style={{ marginBottom: '20px' }}>
               <div style={{ backgroundColor: 'var(--cultured)', padding: '15px', borderRadius: '4px' }}>
                 <h4 style={{ fontSize: '1.3rem', color: 'var(--granite-gray)', marginBottom: '8px', textTransform: 'uppercase' }}>
                   Customer Details

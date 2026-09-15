@@ -63,6 +63,48 @@ export const AdminProducts = () => {
     }));
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select a valid image file (JPG, PNG, WebP)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1000;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        setFormData((prev) => ({ ...prev, image: dataUrl }));
+        showToast(`Loaded "${file.name}" successfully!`);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveProduct = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -306,8 +348,8 @@ export const AdminProducts = () => {
           }}
         >
           <div
-            className="app-modal active"
-            style={{ maxWidth: '650px', padding: '30px' }}
+            className="app-modal active admin-modal-body"
+            style={{ maxWidth: '680px', width: '92%' }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -339,7 +381,94 @@ export const AdminProducts = () => {
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              {/* Local Image Upload & URL Field */}
+              <div className="form-field">
+                <label className="form-label">Product Image *</label>
+                
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+                  <label
+                    htmlFor="product-local-file-input"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      backgroundColor: 'var(--cultured)',
+                      border: '1px dashed var(--tan-crayola)',
+                      color: 'var(--smokey-black)',
+                      padding: '8px 16px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '1.3rem',
+                      fontWeight: '500',
+                      transition: 'var(--transition-1)',
+                    }}
+                  >
+                    <ion-icon name="cloud-upload-outline" style={{ fontSize: '20px', color: 'var(--tan-crayola)' }}></ion-icon>
+                    <span>Upload Local Image (Device)</span>
+                  </label>
+                  <input
+                    id="product-local-file-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    style={{ display: 'none' }}
+                  />
+                  <span style={{ fontSize: '1.2rem', color: 'var(--granite-gray)' }}>
+                    or paste image path / URL below
+                  </span>
+                </div>
+
+                <input
+                  type="text"
+                  name="image"
+                  required
+                  placeholder="e.g. /assets/images/product-1.jpg or choose local image above"
+                  className="form-input"
+                  value={formData.image}
+                  onChange={handleFormChange}
+                />
+
+                {/* Live Image Preview */}
+                {formData.image && (
+                  <div
+                    style={{
+                      marginTop: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '10px 14px',
+                      backgroundColor: 'var(--cultured)',
+                      borderRadius: '6px',
+                      border: '1px solid var(--black_10)',
+                    }}
+                  >
+                    <img
+                      src={formData.image}
+                      alt="Product preview"
+                      style={{ width: '55px', height: '55px', objectFit: 'cover', borderRadius: '4px' }}
+                    />
+                    <div style={{ flexGrow: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: '1.2rem', color: '#0ba360', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <ion-icon name="checkmark-circle"></ion-icon> Image Ready
+                      </span>
+                      <span style={{ fontSize: '1.1rem', color: 'var(--granite-gray)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
+                        {formData.image.startsWith('data:') ? 'Local file uploaded' : formData.image}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="clear image"
+                      title="Clear image"
+                      onClick={() => setFormData((prev) => ({ ...prev, image: '' }))}
+                      style={{ color: 'var(--red-orange-color-wheel)', fontSize: '1.8rem', padding: '4px', background: 'none', border: 'none', cursor: 'pointer' }}
+                    >
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="form-row-2">
                 <div className="form-field">
                   <label className="form-label">Category *</label>
                   <select
@@ -355,20 +484,19 @@ export const AdminProducts = () => {
                 </div>
 
                 <div className="form-field">
-                  <label className="form-label">Image Path / URL *</label>
+                  <label className="form-label">Material</label>
                   <input
                     type="text"
-                    name="image"
-                    required
-                    placeholder="/assets/images/product-1.jpg"
+                    name="material"
+                    placeholder="e.g. Solid Turkish Oak / Ceramic"
                     className="form-input"
-                    value={formData.image}
+                    value={formData.material}
                     onChange={handleFormChange}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+              <div className="form-row-2">
                 <div className="form-field">
                   <label className="form-label">Price in Naira (₦) *</label>
                   <input
@@ -395,7 +523,7 @@ export const AdminProducts = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+              <div className="form-row-3">
                 <div className="form-field">
                   <label className="form-label">Stock Quantity</label>
                   <input
@@ -445,11 +573,11 @@ export const AdminProducts = () => {
                 ></textarea>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   className="app-btn-secondary"
-                  style={{ width: 'auto', padding: '10px 20px', margin: 0 }}
+                  style={{ width: 'auto', minWidth: '100px', padding: '10px 20px', margin: 0 }}
                   onClick={() => {
                     setIsAddModalOpen(false);
                     setEditingProduct(null);
@@ -461,7 +589,7 @@ export const AdminProducts = () => {
                 <button
                   type="submit"
                   className="app-btn-primary"
-                  style={{ width: 'auto', padding: '10px 25px' }}
+                  style={{ width: 'auto', minWidth: '140px', padding: '10px 25px' }}
                   disabled={submitting}
                 >
                   {submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
@@ -476,8 +604,8 @@ export const AdminProducts = () => {
       {deletingProduct && (
         <div className="app-overlay active" onClick={() => setDeletingProduct(null)}>
           <div
-            className="app-modal active"
-            style={{ maxWidth: '460px', padding: '30px', textAlign: 'center' }}
+            className="app-modal active admin-modal-body"
+            style={{ maxWidth: '460px', width: '92%', textAlign: 'center' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div
