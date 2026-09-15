@@ -4,13 +4,18 @@ import { useStore } from '../context/StoreContext';
 export const ProductCard = ({ product }) => {
   const {
     addToCart,
+    incrementItem,
+    decrementItem,
+    getItemQuantity,
     toggleWishlist,
     isInWishlist,
     setSelectedProductForModal,
     formatNaira,
   } = useStore();
 
-  const isLiked = isInWishlist(product._id || product.id);
+  const prodId = product._id || product.id;
+  const isLiked = isInWishlist(prodId);
+  const inCartQty = getItemQuantity(prodId);
 
   return (
     <div className="product-card">
@@ -30,19 +35,45 @@ export const ProductCard = ({ product }) => {
 
         {/* Hover Action Buttons */}
         <ul className="card-action-list" onClick={(e) => e.stopPropagation()}>
-          <li>
-            <button
-              className="card-action-btn"
-              aria-label="add to cart"
-              title="Add to Cart"
-              onClick={() => addToCart(product, 1)}
-            >
-              <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
-            </button>
-          </li>
+          {inCartQty > 0 ? (
+            <li className="card-action-qty-pill">
+              <button
+                type="button"
+                className="card-action-btn-sm"
+                aria-label="decrease quantity"
+                title="Decrease"
+                onClick={() => decrementItem(prodId)}
+              >
+                <ion-icon name="remove-outline" aria-hidden="true"></ion-icon>
+              </button>
+              <span className="card-action-qty-num">{inCartQty}</span>
+              <button
+                type="button"
+                className="card-action-btn-sm"
+                aria-label="increase quantity"
+                title="Increase"
+                onClick={() => incrementItem(product)}
+              >
+                <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
+              </button>
+            </li>
+          ) : (
+            <li>
+              <button
+                type="button"
+                className="card-action-btn"
+                aria-label="add to cart"
+                title="Add to Cart"
+                onClick={() => incrementItem(product)}
+              >
+                <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
+              </button>
+            </li>
+          )}
 
           <li>
             <button
+              type="button"
               className="card-action-btn"
               aria-label="view details"
               title="Quick View"
@@ -54,6 +85,7 @@ export const ProductCard = ({ product }) => {
 
           <li>
             <button
+              type="button"
               className={`card-action-btn ${isLiked ? 'liked' : ''}`}
               aria-label="add to wishlist"
               title={isLiked ? 'Remove from Wishlist' : 'Add to Wishlist'}
@@ -77,6 +109,14 @@ export const ProductCard = ({ product }) => {
               </div>
             </li>
           </ul>
+        )}
+
+        {/* In-cart Active Badge */}
+        {inCartQty > 0 && (
+          <div className="card-incart-badge" title={`${inCartQty} in shopping bag`}>
+            <ion-icon name="bag-handle"></ion-icon>
+            <span>{inCartQty} in bag</span>
+          </div>
         )}
 
         {/* Out of stock badge */}

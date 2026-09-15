@@ -409,6 +409,123 @@ body.active { overflow: hidden; }
 
 .hero-card .card-title:is(:hover, :focus) { color: var(--tan-crayola); }
 
+/*-----------------------------------*\
+  #HERO MOBILE SLIDER
+\*-----------------------------------*/
+
+.hero-mobile-slider {
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.hero-slider-track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  width: 100%;
+}
+
+.hero-slide-item {
+  min-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.hero-card.mobile-card {
+  position: relative;
+  width: 100%;
+  height: 389px; /* EXACT height of furniture card (Helen Chair) */
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.hero-card.mobile-card .card-banner {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.hero-card.mobile-card .img-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  color: var(--smokey-black);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: var(--transition-1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 3;
+}
+
+.slider-arrow:hover {
+  background-color: var(--tan-crayola);
+  color: var(--white);
+}
+
+.slider-arrow.prev {
+  left: 15px;
+}
+
+.slider-arrow.next {
+  right: 15px;
+}
+
+.slider-dots {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 3;
+}
+
+.slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  border: none;
+  cursor: pointer;
+  transition: var(--transition-1);
+  padding: 0;
+}
+
+.slider-dot.active {
+  background-color: var(--tan-crayola);
+  width: 24px;
+  border-radius: 12px;
+}
+
+@media (min-width: 768px) {
+  .hero-mobile-slider {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-list.desktop-hero {
+    display: none;
+  }
+}
+
 
 
 
@@ -512,6 +629,58 @@ body.active { overflow: hidden; }
 }
 
 .product-card .card-action-btn:is(:hover, :focus) { color: var(--tan-crayola); }
+
+.card-action-qty-pill {
+  display: flex;
+  align-items: center;
+  background-color: var(--white);
+  border-radius: 30px;
+  padding: 4px 8px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  gap: 2px;
+}
+
+.card-action-btn-sm {
+  background: none;
+  border: none;
+  font-size: 20px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--smokey-black);
+  cursor: pointer;
+  transition: var(--transition-1);
+}
+
+.card-action-btn-sm:is(:hover, :focus) {
+  color: var(--tan-crayola);
+}
+
+.card-action-qty-num {
+  font-size: 1.4rem;
+  font-weight: 700;
+  min-width: 22px;
+  text-align: center;
+  color: var(--smokey-black);
+}
+
+.card-incart-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: var(--tan-crayola);
+  color: var(--white);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
 
 .product-card .badge-list {
   position: absolute;

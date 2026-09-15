@@ -6,10 +6,10 @@ const businessInfoSchema = new mongoose.Schema(
     shortName: { type: String, default: 'Romadec' },
     tagline: { type: String, default: 'Get Quality Furniture' },
     email: { type: String, default: 'support@romadec.com' },
-    phone: { type: String, default: '+234 (0) 803 123 4567' },
+    phone: { type: String, default: '+234 (0) 808 760 8827' },
     address: {
       type: String,
-      default: '12 Adeola Odeku Street, Victoria Island, Lagos, Nigeria',
+      default: '93 Olojo Drive, Ojo, Lagos, Nigeria',
     },
     city: { type: String, default: 'Victoria Island, Lagos' },
     state: { type: String, default: 'Lagos' },

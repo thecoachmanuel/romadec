@@ -8,6 +8,7 @@ export const WishlistDrawer = () => {
     wishlist,
     toggleWishlist,
     addToCart,
+    getItemQuantity,
     formatNaira,
     setSelectedProductForModal,
   } = useStore();
@@ -77,7 +78,14 @@ export const WishlistDrawer = () => {
                     >
                       {item.title}
                     </h4>
-                    <p className="cart-item-price">{formatNaira(item.price)}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="cart-item-price">{formatNaira(item.price)}</span>
+                      {getItemQuantity(item._id || item.id) > 0 && (
+                        <span style={{ fontSize: '1.2rem', color: 'var(--tan-crayola)', fontWeight: '600' }}>
+                          ({getItemQuantity(item._id || item.id)} in bag)
+                        </span>
+                      )}
+                    </div>
 
                     <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                       <button
@@ -97,7 +105,7 @@ export const WishlistDrawer = () => {
                         onClick={() => handleMoveToCart(item)}
                       >
                         <ion-icon name="bag-add-outline"></ion-icon>
-                        Move to Bag
+                        {getItemQuantity(item._id || item.id) > 0 ? 'Add More to Bag' : 'Move to Bag'}
                       </button>
 
                       <button

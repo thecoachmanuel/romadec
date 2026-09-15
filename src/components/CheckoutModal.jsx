@@ -35,6 +35,9 @@ export const CheckoutModal = () => {
     formatNaira,
     showToast,
     businessInfo,
+    incrementItem,
+    decrementItem,
+    removeFromCart,
   } = useStore();
 
   const navigate = useNavigate();
@@ -315,42 +318,101 @@ export const CheckoutModal = () => {
                 Order Summary ({cart.length} items)
               </h3>
 
-              <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '16px' }}>
-                {cart.map((item) => (
-                  <div
-                    key={item.product}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      marginBottom: '12px',
-                    }}
+              {cart.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '30px 0', color: 'var(--granite-gray)' }}>
+                  <ion-icon name="bag-outline" style={{ fontSize: '36px', marginBottom: '10px' }}></ion-icon>
+                  <p style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Your shopping bag is empty.</p>
+                  <button
+                    type="button"
+                    className="app-btn-secondary"
+                    style={{ fontSize: '1.2rem', padding: '6px 14px' }}
+                    onClick={() => setIsCheckoutOpen(false)}
                   >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '4px' }}
-                    />
-                    <div style={{ flexGrow: 1, minWidth: 0 }}>
-                      <p
-                        style={{
-                          fontSize: '1.3rem',
-                          fontWeight: '500',
-                          color: 'var(--smokey-black)',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                        }}
-                      >
-                        {item.title}
-                      </p>
-                      <span style={{ fontSize: '1.2rem', color: 'var(--granite-gray)' }}>
-                        Qty: {item.quantity} × {formatNaira(item.price)}
-                      </span>
+                    Continue Shopping
+                  </button>
+                </div>
+              ) : (
+                <div style={{ maxHeight: '220px', overflowY: 'auto', marginBottom: '16px' }}>
+                  {cart.map((item) => (
+                    <div
+                      key={item.product}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        marginBottom: '12px',
+                        paddingBottom: '8px',
+                        borderBottom: '1px dashed var(--black_10)',
+                      }}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }}
+                      />
+                      <div style={{ flexGrow: 1, minWidth: 0 }}>
+                        <p
+                          style={{
+                            fontSize: '1.3rem',
+                            fontWeight: '500',
+                            color: 'var(--smokey-black)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {item.title}
+                        </p>
+                        <span style={{ fontSize: '1.2rem', color: 'var(--granite-gray)' }}>
+                          {formatNaira(item.price)} each
+                        </span>
+                      </div>
+
+                      {/* Quantity Controls in Checkout */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                        <div className="qty-control" style={{ transform: 'scale(0.85)', transformOrigin: 'right center' }}>
+                          <button
+                            type="button"
+                            className="qty-btn"
+                            aria-label="decrease quantity"
+                            onClick={() => decrementItem(item.product)}
+                          >
+                            -
+                          </button>
+                          <span className="qty-number">{item.quantity}</span>
+                          <button
+                            type="button"
+                            className="qty-btn"
+                            aria-label="increase quantity"
+                            onClick={() => incrementItem(item)}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        <button
+                          type="button"
+                          aria-label="remove item"
+                          title="Remove item"
+                          onClick={() => removeFromCart(item.product)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--granite-gray)',
+                            fontSize: '1.6rem',
+                            cursor: 'pointer',
+                            padding: '2px',
+                            display: 'flex',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <ion-icon name="trash-outline"></ion-icon>
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
               <div style={{ borderTop: '1px solid var(--black_10)', paddingTop: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '1.4rem' }}>
@@ -380,7 +442,7 @@ export const CheckoutModal = () => {
               <button
                 type="submit"
                 className="paystack-btn"
-                disabled={processing}
+                disabled={processing || cart.length === 0}
               >
                 {processing ? (
                   <span>Processing with Paystack...</span>

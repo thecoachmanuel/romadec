@@ -6,26 +6,54 @@ export const ProductDetailModal = () => {
     selectedProductForModal,
     setSelectedProductForModal,
     addToCart,
-    setIsCartOpen,
+    incrementItem,
+    decrementItem,
+    getItemQuantity,
     setIsCheckoutOpen,
     formatNaira,
     toggleWishlist,
     isInWishlist,
   } = useStore();
 
-  const [quantity, setQuantity] = useState(1);
+  const [localQuantity, setLocalQuantity] = useState(1);
 
   if (!selectedProductForModal) return null;
 
   const product = selectedProductForModal;
-  const isLiked = isInWishlist(product._id || product.id);
+  const prodId = product._id || product.id;
+  const isLiked = isInWishlist(prodId);
+  const inCartQty = getItemQuantity(prodId);
+
+  const displayQuantity = inCartQty > 0 ? inCartQty : localQuantity;
+
+  const handleIncrement = () => {
+    if (inCartQty > 0) {
+      incrementItem(product);
+    } else {
+      setLocalQuantity((prev) => prev + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (inCartQty > 0) {
+      decrementItem(prodId);
+    } else {
+      setLocalQuantity((prev) => Math.max(1, prev - 1));
+    }
+  };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    if (inCartQty > 0) {
+      incrementItem(product);
+    } else {
+      addToCart(product, localQuantity);
+    }
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity);
+    if (inCartQty === 0) {
+      addToCart(product, localQuantity);
+    }
     setSelectedProductForModal(null);
     setIsCheckoutOpen(true);
   };
@@ -103,9 +131,9 @@ export const ProductDetailModal = () => {
               </tbody>
             </table>
 
-            {/* Quantity Selector */}
+            {/* Quantity Selector Synchronized Across App */}
             {product.inStock !== false && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '1.4rem', fontWeight: '500', color: 'var(--smokey-black)' }}>
                   Quantity:
                 </span>
@@ -113,19 +141,27 @@ export const ProductDetailModal = () => {
                   <button
                     type="button"
                     className="qty-btn"
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    aria-label="decrease quantity"
+                    onClick={handleDecrement}
                   >
                     -
                   </button>
-                  <span className="qty-number">{quantity}</span>
+                  <span className="qty-number">{displayQuantity}</span>
                   <button
                     type="button"
                     className="qty-btn"
-                    onClick={() => setQuantity(quantity + 1)}
+                    aria-label="increase quantity"
+                    onClick={handleIncrement}
                   >
                     +
                   </button>
                 </div>
+
+                {inCartQty > 0 && (
+                  <span style={{ fontSize: '1.2rem', color: 'var(--tan-crayola)', fontWeight: '500' }}>
+                    ({inCartQty} in bag)
+                  </span>
+                )}
 
                 <button
                   type="button"
@@ -158,7 +194,11 @@ export const ProductDetailModal = () => {
                 style={product.inStock === false ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
                 onClick={handleAddToCart}
               >
-                {product.inStock === false ? 'Out of Stock' : 'Add to Cart'}
+                {product.inStock === false
+                  ? 'Out of Stock'
+                  : inCartQty > 0
+                  ? `In Bag (${inCartQty}) • Add More`
+                  : 'Add to Cart'}
               </button>
 
               {product.inStock !== false && (

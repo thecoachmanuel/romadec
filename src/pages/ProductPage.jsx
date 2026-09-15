@@ -19,6 +19,9 @@ export const ProductPage = () => {
     products,
     formatNaira,
     addToCart,
+    incrementItem,
+    decrementItem,
+    getItemQuantity,
     toggleWishlist,
     isInWishlist,
     setIsCheckoutOpen,
@@ -26,7 +29,7 @@ export const ProductPage = () => {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
+  const [localQuantity, setLocalQuantity] = useState(1);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -153,25 +156,51 @@ export const ProductPage = () => {
                 </table>
 
                 {product.inStock !== false && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '1.4rem', fontWeight: '500' }}>Quantity:</span>
                     <div className="qty-control">
                       <button
                         type="button"
                         className="qty-btn"
-                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        aria-label="decrease quantity"
+                        onClick={() => {
+                          const inCart = getItemQuantity(product._id || product.id);
+                          if (inCart > 0) {
+                            decrementItem(product._id || product.id);
+                          } else {
+                            setLocalQuantity((q) => Math.max(1, q - 1));
+                          }
+                        }}
                       >
                         -
                       </button>
-                      <span className="qty-number">{quantity}</span>
+                      <span className="qty-number">
+                        {getItemQuantity(product._id || product.id) > 0
+                          ? getItemQuantity(product._id || product.id)
+                          : localQuantity}
+                      </span>
                       <button
                         type="button"
                         className="qty-btn"
-                        onClick={() => setQuantity(quantity + 1)}
+                        aria-label="increase quantity"
+                        onClick={() => {
+                          const inCart = getItemQuantity(product._id || product.id);
+                          if (inCart > 0) {
+                            incrementItem(product);
+                          } else {
+                            setLocalQuantity((q) => q + 1);
+                          }
+                        }}
                       >
                         +
                       </button>
                     </div>
+
+                    {getItemQuantity(product._id || product.id) > 0 && (
+                      <span style={{ fontSize: '1.2rem', color: 'var(--tan-crayola)', fontWeight: '500' }}>
+                        ({getItemQuantity(product._id || product.id)} in bag)
+                      </span>
+                    )}
 
                     <button
                       type="button"
@@ -200,9 +229,20 @@ export const ProductPage = () => {
                     type="button"
                     className="app-btn-primary"
                     disabled={product.inStock === false}
-                    onClick={() => addToCart(product, quantity)}
+                    onClick={() => {
+                      const inCart = getItemQuantity(product._id || product.id);
+                      if (inCart > 0) {
+                        incrementItem(product);
+                      } else {
+                        addToCart(product, localQuantity);
+                      }
+                    }}
                   >
-                    {product.inStock === false ? 'Out of Stock' : 'Add to Cart'}
+                    {product.inStock === false
+                      ? 'Out of Stock'
+                      : getItemQuantity(product._id || product.id) > 0
+                      ? `In Bag (${getItemQuantity(product._id || product.id)}) • Add More`
+                      : 'Add to Cart'}
                   </button>
 
                   {product.inStock !== false && (
@@ -210,7 +250,10 @@ export const ProductPage = () => {
                       type="button"
                       className="app-btn-secondary"
                       onClick={() => {
-                        addToCart(product, quantity);
+                        const inCart = getItemQuantity(product._id || product.id);
+                        if (inCart === 0) {
+                          addToCart(product, localQuantity);
+                        }
                         setIsCheckoutOpen(true);
                       }}
                     >

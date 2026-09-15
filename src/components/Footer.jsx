@@ -107,14 +107,14 @@ export const Footer = () => {
             <li className="footer-list-item">
               <ion-icon name="location-sharp" aria-hidden="true"></ion-icon>
               <address className="address">
-                {businessInfo.address || '12 Adeola Odeku Street, Victoria Island, Lagos, Nigeria'}
+                {businessInfo.address || '93 Olojo Drive, Ojo, Lagos, Nigeria'}
               </address>
             </li>
 
             <li className="footer-list-item">
               <ion-icon name="call-sharp" aria-hidden="true"></ion-icon>
               <a href={`tel:${businessInfo.phone?.replace(/[^0-9+]/g, '')}`} className="footer-link">
-                {businessInfo.phone || '+234 (0) 803 123 4567'}
+                {businessInfo.phone || '+234 (0) 808 760 8827'}
               </a>
             </li>
 

@@ -43,8 +43,8 @@ export const StoreProvider = ({ children }) => {
     shortName: 'Romadec',
     tagline: 'Get Quality Furniture',
     email: 'support@romadec.com',
-    phone: '+234 (0) 803 123 4567',
-    address: '12 Adeola Odeku Street, Victoria Island, Lagos, Nigeria',
+    phone: '+234 (0) 808 760 8827',
+    address: '93 Olojo Drive, Ojo, Lagos, Nigeria',
     city: 'Victoria Island, Lagos',
     state: 'Lagos',
     country: 'Nigeria',
@@ -130,16 +130,23 @@ export const StoreProvider = ({ children }) => {
   }, [searchQuery, products]);
 
   // Cart Operations
+  const getItemQuantity = (productId) => {
+    if (!productId) return 0;
+    const item = cart.find((i) => String(i.product) === String(productId));
+    return item ? item.quantity : 0;
+  };
+
   const addToCart = (product, quantity = 1) => {
     if (product.inStock === false || product.stockQuantity === 0) {
       showToast('Sorry, this product is currently out of stock!');
       return;
     }
+    const prodId = product._id || product.id || product.product;
     setCart((prev) => {
-      const existing = prev.find((item) => item.product === (product._id || product.id));
+      const existing = prev.find((item) => String(item.product) === String(prodId));
       if (existing) {
         return prev.map((item) =>
-          item.product === (product._id || product.id)
+          String(item.product) === String(prodId)
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
@@ -147,7 +154,7 @@ export const StoreProvider = ({ children }) => {
       return [
         ...prev,
         {
-          product: product._id || product.id,
+          product: prodId,
           title: product.title,
           price: product.price,
           image: product.image,
@@ -158,8 +165,86 @@ export const StoreProvider = ({ children }) => {
     showToast(`Added "${product.title}" to cart`);
   };
 
+  const incrementItem = (product) => {
+    if (product.inStock === false || product.stockQuantity === 0) {
+      showToast('Sorry, this product is currently out of stock!');
+      return;
+    }
+    const prodId = product._id || product.id || product.product;
+    setCart((prev) => {
+      const existing = prev.find((item) => String(item.product) === String(prodId));
+      if (existing) {
+        return prev.map((item) =>
+          String(item.product) === String(prodId)
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [
+        ...prev,
+        {
+          product: prodId,
+          title: product.title,
+          price: product.price,
+          image: product.image,
+          quantity: 1,
+        },
+      ];
+    });
+    showToast(`Updated "${product.title}" quantity`);
+  };
+
+  const decrementItem = (productOrId) => {
+    const prodId =
+      typeof productOrId === 'object'
+        ? productOrId._id || productOrId.id || productOrId.product
+        : productOrId;
+
+    setCart((prev) => {
+      const existing = prev.find((item) => String(item.product) === String(prodId));
+      if (!existing) return prev;
+      if (existing.quantity <= 1) {
+        return prev.filter((item) => String(item.product) !== String(prodId));
+      }
+      return prev.map((item) =>
+        String(item.product) === String(prodId)
+          ? { ...item, quantity: item.quantity - 1 }
+          : item
+      );
+    });
+    showToast('Updated item quantity');
+  };
+
+  const setItemQuantity = (product, newQuantity) => {
+    const prodId = product._id || product.id || product.product;
+    if (newQuantity <= 0) {
+      removeFromCart(prodId);
+      return;
+    }
+    setCart((prev) => {
+      const existing = prev.find((item) => String(item.product) === String(prodId));
+      if (existing) {
+        return prev.map((item) =>
+          String(item.product) === String(prodId)
+            ? { ...item, quantity: newQuantity }
+            : item
+        );
+      }
+      return [
+        ...prev,
+        {
+          product: prodId,
+          title: product.title,
+          price: product.price,
+          image: product.image,
+          quantity: newQuantity,
+        },
+      ];
+    });
+  };
+
   const removeFromCart = (productId) => {
-    setCart((prev) => prev.filter((item) => item.product !== productId));
+    setCart((prev) => prev.filter((item) => String(item.product) !== String(productId)));
     showToast('Item removed from cart');
   };
 
@@ -170,7 +255,9 @@ export const StoreProvider = ({ children }) => {
     }
     setCart((prev) =>
       prev.map((item) =>
-        item.product === productId ? { ...item, quantity: newQuantity } : item
+        String(item.product) === String(productId)
+          ? { ...item, quantity: newQuantity }
+          : item
       )
     );
   };
@@ -235,6 +322,10 @@ export const StoreProvider = ({ children }) => {
         searchResults,
         cart,
         addToCart,
+        incrementItem,
+        decrementItem,
+        setItemQuantity,
+        getItemQuantity,
         removeFromCart,
         updateQuantity,
         clearCart,
