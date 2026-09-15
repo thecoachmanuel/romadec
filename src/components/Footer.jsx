@@ -31,7 +31,7 @@ export const Footer = () => {
             </a>
 
             <p className="footer-text">
-              Premium handcrafted furniture and contemporary architectural home decorations in Nigeria.
+              Modern & luxury Turkish furniture with timeless designs to suit any style of interior design. Worldwide delivery. Est. in 1994.
             </p>
 
             <ul className="social-list">

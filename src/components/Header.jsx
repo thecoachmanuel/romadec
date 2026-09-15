@@ -15,6 +15,7 @@ export const Header = () => {
     setSelectedProductForModal,
     formatNaira,
     businessInfo,
+    isAdminLoggedIn,
   } = useStore();
 
   const [isScrolled, setIsScrolled] = useState(false);
@@ -108,12 +109,32 @@ export const Header = () => {
         <div className="header-action">
           {/* Admin / Account Button */}
           <button
-            className="header-action-btn"
+            className={`header-action-btn ${isAdminLoggedIn ? 'admin-active' : ''}`}
             aria-label="admin dashboard"
-            title="Admin Dashboard"
+            title={isAdminLoggedIn ? 'Go to Admin Dashboard (Logged In)' : 'Admin Login'}
             onClick={() => navigate('/admin')}
+            style={{ color: 'var(--smokey-black)', position: 'relative' }}
           >
-            <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+            <ion-icon
+              name={isAdminLoggedIn ? 'shield-checkmark-outline' : 'person-outline'}
+              aria-hidden="true"
+              style={{ color: isAdminLoggedIn ? 'var(--tan-crayola)' : 'var(--smokey-black)' }}
+            ></ion-icon>
+            {isAdminLoggedIn && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '-2px',
+                  right: '-2px',
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: '#0ba360',
+                  border: '2px solid var(--white)',
+                }}
+                title="Admin active"
+              ></span>
+            )}
           </button>
 
           {/* Wishlist Button */}
@@ -122,8 +143,9 @@ export const Header = () => {
             aria-label="favorite list"
             title="Wishlist"
             onClick={() => setIsWishlistOpen(true)}
+            style={{ color: 'var(--smokey-black)' }}
           >
-            <ion-icon name="heart-outline" aria-hidden="true"></ion-icon>
+            <ion-icon name="heart-outline" aria-hidden="true" style={{ color: 'var(--smokey-black)' }}></ion-icon>
             <span className="btn-badge">{wishlistCount}</span>
           </button>
 
@@ -133,8 +155,9 @@ export const Header = () => {
             aria-label="cart"
             title="Shopping Cart"
             onClick={() => setIsCartOpen(true)}
+            style={{ color: 'var(--smokey-black)' }}
           >
-            <ion-icon name="bag-handle-outline" aria-hidden="true"></ion-icon>
+            <ion-icon name="bag-handle-outline" aria-hidden="true" style={{ color: 'var(--smokey-black)' }}></ion-icon>
             <span className="btn-badge">{cartCount}</span>
           </button>
 
@@ -143,8 +166,9 @@ export const Header = () => {
             className="header-action-btn"
             aria-label="open menu"
             onClick={() => setIsSidebarOpen(true)}
+            style={{ color: 'var(--smokey-black)' }}
           >
-            <ion-icon name="menu-outline" aria-hidden="true"></ion-icon>
+            <ion-icon name="menu-outline" aria-hidden="true" style={{ color: 'var(--smokey-black)' }}></ion-icon>
           </button>
         </div>
       </div>

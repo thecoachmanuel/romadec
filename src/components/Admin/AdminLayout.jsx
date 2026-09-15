@@ -13,12 +13,13 @@ export const AdminLayout = () => {
   });
 
   const [activeTab, setActiveTab] = useState('overview');
-  const { businessInfo, showToast } = useStore();
+  const { businessInfo, showToast, setIsAdminLoggedIn } = useStore();
 
   const handleLogout = () => {
     localStorage.removeItem('romadec_admin_token');
     localStorage.removeItem('romadec_admin_user');
     setIsAuthenticated(false);
+    if (setIsAdminLoggedIn) setIsAdminLoggedIn(false);
     showToast('Logged out of Admin dashboard');
   };
 

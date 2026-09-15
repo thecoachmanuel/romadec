@@ -4,7 +4,7 @@ import { api } from '../../services/api';
 import { useStore } from '../../context/StoreContext';
 
 export const AdminLogin = ({ onLoginSuccess }) => {
-  const { businessInfo, showToast } = useStore();
+  const { businessInfo, showToast, setIsAdminLoggedIn } = useStore();
   const [email, setEmail] = useState('admin@romadec.com');
   const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
@@ -19,6 +19,7 @@ export const AdminLogin = ({ onLoginSuccess }) => {
       const response = await api.adminLogin({ email, password });
       localStorage.setItem('romadec_admin_token', response.token);
       localStorage.setItem('romadec_admin_user', JSON.stringify(response.user));
+      if (setIsAdminLoggedIn) setIsAdminLoggedIn(true);
       showToast('Logged in successfully!');
       onLoginSuccess(response.user);
     } catch (err) {

@@ -1,8 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 
 export const Sidebar = () => {
-  const { isSidebarOpen, setIsSidebarOpen, businessInfo } = useStore();
+  const { isSidebarOpen, setIsSidebarOpen, businessInfo, isAdminLoggedIn } = useStore();
 
   const handleLinkClick = (hash) => {
     setIsSidebarOpen(false);
@@ -19,8 +20,9 @@ export const Sidebar = () => {
           className="nav-close-btn"
           aria-label="close menu"
           onClick={() => setIsSidebarOpen(false)}
+          style={{ color: 'var(--smokey-black)' }}
         >
-          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+          <ion-icon name="close-outline" aria-hidden="true" style={{ color: 'var(--smokey-black)' }}></ion-icon>
         </button>
 
         <div className="wrapper">
@@ -54,6 +56,20 @@ export const Sidebar = () => {
 
         <nav className="navbar">
           <ul className="navbar-list">
+            {isAdminLoggedIn && (
+              <li className="navbar-item" style={{ borderBottom: '1px solid var(--black_10)', paddingBottom: '12px', marginBottom: '16px' }}>
+                <Link
+                  to="/admin"
+                  className="navbar-link"
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--tan-crayola)', fontWeight: '700' }}
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  <ion-icon name="shield-checkmark" style={{ fontSize: '20px', color: 'var(--tan-crayola)' }}></ion-icon>
+                  <span>Admin Dashboard</span>
+                </Link>
+              </li>
+            )}
+
             <li className="navbar-item">
               <a
                 href="#home"

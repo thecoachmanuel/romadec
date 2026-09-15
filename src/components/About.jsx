@@ -13,7 +13,7 @@ export const About = () => {
 
           <p className="section-text">
             {businessInfo.aboutText ||
-              'When you start with a portrait and search for a pure form, a clear volume, through successive eliminations, you arrive inevitably at the egg. Likewise, starting with the egg and following the same process in reverse, one finishes with the portrait.'}
+              'Modern & Luxury Turkish Furniture. Timeless designs to suit any style of interior design. Worldwide Delivery. Est. in 1994.'}
           </p>
 
           <div className="about-card">
