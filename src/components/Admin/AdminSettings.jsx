@@ -8,7 +8,16 @@ export const AdminSettings = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    setFormData({ ...businessInfo });
+    if (businessInfo) {
+      setFormData({
+        ...businessInfo,
+        socialLinks: {
+          facebook: businessInfo.socialLinks?.facebook || 'https://facebook.com/romadec',
+          twitter: businessInfo.socialLinks?.twitter || 'https://twitter.com/romadec',
+          instagram: businessInfo.socialLinks?.instagram || 'https://instagram.com/romadec',
+        },
+      });
+    }
   }, [businessInfo]);
 
   const handleChange = (e) => {
@@ -18,7 +27,7 @@ export const AdminSettings = () => {
       setFormData((prev) => ({
         ...prev,
         socialLinks: {
-          ...prev.socialLinks,
+          ...(prev.socialLinks || {}),
           [network]: value,
         },
       }));

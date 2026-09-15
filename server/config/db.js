@@ -5,8 +5,9 @@ import { BusinessInfo } from '../models/BusinessInfo.js';
 import { Order } from '../models/Order.js';
 
 let isConnected = false;
+let cachedConnection = null;
 
-// Fallback in-memory storage if MongoDB is not running locally
+// Fallback in-memory storage if MongoDB is temporarily unreachable
 export const memoryStore = {
   products: initialProducts.map((p, index) => ({
     ...p,
@@ -63,14 +64,20 @@ export const memoryStore = {
 };
 
 export const connectDB = async () => {
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return cachedConnection;
+  }
+
   const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/romadec';
   try {
     mongoose.set('strictQuery', false);
-    await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 3000,
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 15000,
     });
+    cachedConnection = conn;
     isConnected = true;
-    console.log(`[MongoDB] Connected successfully to ${uri}`);
+    console.log(`[MongoDB] Connected successfully to ${uri.replace(/:([^:@]+)@/, ':****@')}`);
 
     // Check and seed if empty
     const productCount = await Product.countDocuments();
@@ -86,14 +93,16 @@ export const connectDB = async () => {
       await BusinessInfo.create(initialBusinessInfo);
       console.log('[MongoDB] Business info seeded.');
     }
+    return conn;
   } catch (err) {
     isConnected = false;
     console.warn(
-      `[MongoDB] Notice: Could not connect to MongoDB daemon (${err.message}).`
+      `[MongoDB] Notice: Could not connect to MongoDB (${err.message}).`
     );
     console.log(
-      '[Storage] Operating seamlessly in In-Memory/Fallback mode with initial seed data. Configure MONGODB_URI in .env anytime to switch to live MongoDB.'
+      '[Storage] Operating in fallback memory mode. Configure MONGODB_URI to connect to MongoDB.'
     );
+    return null;
   }
 };
 
@@ -108,7 +117,11 @@ export const ProductRepo = {
         query.category = filter.category;
       }
       if (filter.search) {
-        query.title = { $regex: filter.search, $options: 'i' };
+        query.$or = [
+          { title: { $regex: filter.search, $options: 'i' } },
+          { category: { $regex: filter.search, $options: 'i' } },
+          { description: { $regex: filter.search, $options: 'i' } },
+        ];
       }
       return await Product.find(query).sort({ createdAt: -1 });
     }
@@ -130,9 +143,20 @@ export const ProductRepo = {
 
   async findById(id) {
     if (isConnected) {
-      return await Product.findById(id);
+      if (mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === String(id)) {
+        const byId = await Product.findById(id);
+        if (byId) return byId;
+      }
+      return await Product.findOne({
+        $or: [{ slug: id }, { title: new RegExp(`^${id}$`, 'i') }],
+      });
     }
-    return memoryStore.products.find((p) => String(p._id) === String(id));
+    return memoryStore.products.find(
+      (p) =>
+        String(p._id) === String(id) ||
+        p.slug === id ||
+        p.title.toLowerCase() === String(id).toLowerCase()
+    );
   },
 
   async create(data) {
@@ -150,14 +174,25 @@ export const ProductRepo = {
   },
 
   async findByIdAndUpdate(id, data) {
+    const updateData = { ...data };
+    delete updateData._id;
+    delete updateData.__v;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+
     if (isConnected) {
-      return await Product.findByIdAndUpdate(id, data, { new: true });
+      if (mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === String(id)) {
+        return await Product.findByIdAndUpdate(id, updateData, { new: true });
+      }
+      return await Product.findOneAndUpdate({ slug: id }, updateData, { new: true });
     }
-    const index = memoryStore.products.findIndex((p) => String(p._id) === String(id));
+    const index = memoryStore.products.findIndex(
+      (p) => String(p._id) === String(id) || p.slug === id
+    );
     if (index === -1) return null;
     memoryStore.products[index] = {
       ...memoryStore.products[index],
-      ...data,
+      ...updateData,
       updatedAt: new Date().toISOString(),
     };
     return memoryStore.products[index];
@@ -165,9 +200,14 @@ export const ProductRepo = {
 
   async findByIdAndDelete(id) {
     if (isConnected) {
-      return await Product.findByIdAndDelete(id);
+      if (mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === String(id)) {
+        return await Product.findByIdAndDelete(id);
+      }
+      return await Product.findOneAndDelete({ slug: id });
     }
-    const index = memoryStore.products.findIndex((p) => String(p._id) === String(id));
+    const index = memoryStore.products.findIndex(
+      (p) => String(p._id) === String(id) || p.slug === id
+    );
     if (index === -1) return null;
     const deleted = memoryStore.products.splice(index, 1);
     return deleted[0];
@@ -186,7 +226,11 @@ export const OrderRepo = {
 
   async findById(id) {
     if (isConnected) {
-      return await Order.findById(id);
+      if (mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === String(id)) {
+        const byId = await Order.findById(id);
+        if (byId) return byId;
+      }
+      return await Order.findOne({ orderNumber: id });
     }
     return memoryStore.orders.find(
       (o) => String(o._id) === String(id) || o.orderNumber === id
@@ -217,7 +261,10 @@ export const OrderRepo = {
       if (paystackRef) {
         updateData.paystackReference = paystackRef;
       }
-      return await Order.findByIdAndUpdate(id, updateData, { new: true });
+      if (mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === String(id)) {
+        return await Order.findByIdAndUpdate(id, updateData, { new: true });
+      }
+      return await Order.findOneAndUpdate({ orderNumber: id }, updateData, { new: true });
     }
     const order = memoryStore.orders.find(
       (o) => String(o._id) === String(id) || o.orderNumber === id
@@ -249,16 +296,22 @@ export const BusinessRepo = {
   },
 
   async update(data) {
+    const updateData = { ...data };
+    delete updateData._id;
+    delete updateData.__v;
+    delete updateData.createdAt;
+    delete updateData.updatedAt;
+
     if (isConnected) {
       let biz = await BusinessInfo.findOne();
       if (!biz) {
-        return await BusinessInfo.create(data);
+        return await BusinessInfo.create(updateData);
       }
-      return await BusinessInfo.findByIdAndUpdate(biz._id, data, { new: true });
+      return await BusinessInfo.findByIdAndUpdate(biz._id, updateData, { new: true });
     }
     memoryStore.businessInfo = {
       ...memoryStore.businessInfo,
-      ...data,
+      ...updateData,
       updatedAt: new Date().toISOString(),
     };
     return memoryStore.businessInfo;
